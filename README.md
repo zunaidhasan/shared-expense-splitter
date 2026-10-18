@@ -1,6 +1,6 @@
 # Shared Expense Splitter
 
-A lightweight **Flutter** Android app for tracking shared household expenses with roommates or friends.
+A lightweight **Flutter** app for tracking shared household expenses with roommates or friends. It runs on Android and the web.
 
 Perfect for personal use — enter expenses, see who paid, and get a clear balance summary. Everything is stored **locally** on the device. No accounts, no backend, no cloud sync.
 
@@ -27,14 +27,22 @@ Perfect for personal use — enter expenses, see who paid, and get a clear balan
 
 ---
 
+## Web App
+
+The app is deployed at [zunaidhasan.github.io/shared-expense-splitter](https://zunaidhasan.github.io/shared-expense-splitter/). GitHub Actions builds and deploys it whenever changes are pushed to `main`.
+
+To enable deployment for a fork or a repository where Pages is not configured yet, open **Settings → Pages** and set the build and deployment source to **GitHub Actions**.
+
+Web data is stored locally in the browser and is not synced with the Android app or other devices.
+
 ## Tech Stack
 
-- **Flutter** + **Dart**
+- **Flutter** + **Dart** (Android and web)
 - **shared_preferences** for local storage
 - **uuid** for unique IDs
 - **intl** for date formatting
 - Material 3 design
-- Android only (as scoped)
+- Android and web
 
 ---
 
