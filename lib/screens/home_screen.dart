@@ -29,6 +29,10 @@ class _HomeScreenState extends State<HomeScreen> {
         children: _screens,
       ),
       bottomNavigationBar: NavigationBar(
+        backgroundColor: const Color(0xFF101A2D),
+        indicatorColor: const Color(0xFF00A98F),
+        elevation: 0,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
           setState(() => _currentIndex = index);
@@ -45,8 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'People',
           ),
           NavigationDestination(
-            icon: Icon(Icons.add_circle_outline),
-            selectedIcon: Icon(Icons.add_circle),
+            icon: Icon(Icons.add_outlined),
+            selectedIcon: Icon(Icons.add),
             label: 'Add',
           ),
           NavigationDestination(

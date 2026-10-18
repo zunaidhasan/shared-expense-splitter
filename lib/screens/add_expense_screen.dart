@@ -48,6 +48,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     }
   }
 
+  void _addQuickAmount(double amount) {
+    final current = double.tryParse(_amountController.text.trim()) ?? 0;
+    _amountController.text = (current + amount).toStringAsFixed(2);
+    setState(() {});
+  }
+
   Future<void> _saveExpense() async {
     if (!_formKey.currentState!.validate()) return;
     if (_payerId == null) {
@@ -96,133 +102,412 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final amount = double.tryParse(_amountController.text.trim()) ?? 0;
+    final share = _selectedParticipantIds.isEmpty
+        ? 0.0
+        : amount / _selectedParticipantIds.length;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Expense'),
+        title: const Text('Add expense'),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _people.isEmpty
-              ? const Center(
+              ? Center(
                   child: Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Text(
-                      'Add at least one person in the People tab before creating an expense.',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Form(
-                    key: _formKey,
+                    padding: const EdgeInsets.all(28),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        TextFormField(
-                          controller: _titleController,
-                          decoration: const InputDecoration(
-                            labelText: 'Expense title',
-                            hintText: 'e.g. Groceries, Rent, Utilities',
-                          ),
-                          textCapitalization: TextCapitalization.sentences,
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return 'Please enter a title';
-                            }
-                            return null;
-                          },
+                        const Icon(Icons.group_add_outlined,
+                            color: Color(0xFF5ADBC1), size: 34),
+                        const SizedBox(height: 14),
+                        const Text(
+                          'Add your group first',
+                          style: TextStyle(
+                              fontSize: 19, fontWeight: FontWeight.w700),
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _amountController,
-                          decoration: const InputDecoration(
-                            labelText: 'Amount',
-                            hintText: '0.00',
-                            prefixText: '\$ ',
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return 'Please enter an amount';
-                            }
-                            final value = double.tryParse(v.trim());
-                            if (value == null || value <= 0) {
-                              return 'Enter a valid positive number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Who paid?',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          value: _payerId,
-                          decoration: const InputDecoration(
-                            labelText: 'Payer',
-                          ),
-                          items: _people
-                              .map(
-                                (p) => DropdownMenuItem(
-                                  value: p.id,
-                                  child: Text(p.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() => _payerId = value);
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Who shares this expense?',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Equal split among selected people',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(height: 8),
-                        ..._people.map((person) {
-                          final selected =
-                              _selectedParticipantIds.contains(person.id);
-                          return CheckboxListTile(
-                            title: Text(person.name),
-                            value: selected,
-                            onChanged: (checked) {
-                              setState(() {
-                                if (checked == true) {
-                                  _selectedParticipantIds.add(person.id);
-                                } else {
-                                  _selectedParticipantIds.remove(person.id);
-                                }
-                              });
-                            },
-                          );
-                        }),
-                        const SizedBox(height: 24),
-                        FilledButton(
-                          onPressed: _saving ? null : _saveExpense,
-                          child: _saving
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text('Save Expense'),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Add at least one person in the People tab before creating an expense.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Color(0xFF9AA8C0)),
                         ),
                       ],
                     ),
                   ),
+                )
+              : Form(
+                  key: _formKey,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(18, 8, 18, 24),
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1A2A3D),
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Expanded(
+                                  child: Text(
+                                    'TOTAL EXPENSE',
+                                    style: TextStyle(
+                                      color: Color(0xFFB4C2D5),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                Icon(Icons.swap_horiz_rounded,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    size: 18),
+                                const SizedBox(width: 5),
+                                const Text(
+                                  'Equal split',
+                                  style: TextStyle(
+                                    color: Color(0xFF5ADBC1),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  '\$',
+                                  style: TextStyle(
+                                    color: Color(0xFF5ADBC1),
+                                    fontSize: 42,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _amountController,
+                                    onChanged: (_) => setState(() {}),
+                                    style: const TextStyle(
+                                      fontSize: 38,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFFE7ECFF),
+                                    ),
+                                    decoration: const InputDecoration(
+                                      hintText: '0.00',
+                                      filled: false,
+                                      border: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true),
+                                    validator: (value) {
+                                      final parsed =
+                                          double.tryParse(value?.trim() ?? '');
+                                      if (parsed == null || parsed <= 0) {
+                                        return 'Enter a valid amount';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [10.0, 25.0, 50.0, 100.0].map((value) {
+                                return ActionChip(
+                                  label: Text('+ \$${value.toInt()}'),
+                                  backgroundColor: const Color(0xFF101A2D),
+                                  side: BorderSide.none,
+                                  labelStyle: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  onPressed: () => _addQuickAmount(value),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(17),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF151F32),
+                          borderRadius: BorderRadius.circular(19),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'TITLE & PURPOSE',
+                              style: TextStyle(
+                                color: Color(0xFFB4C2D5),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            TextFormField(
+                              controller: _titleController,
+                              decoration: const InputDecoration(
+                                prefixIcon: Icon(Icons.receipt_long_outlined),
+                                hintText: 'e.g. Groceries, rent, utilities',
+                              ),
+                              textCapitalization: TextCapitalization.sentences,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Enter an expense title';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(17),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF151F32),
+                          borderRadius: BorderRadius.circular(19),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Expanded(
+                                  child: Text(
+                                    'Who paid?',
+                                    style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                                Text(
+                                  'PAYER',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: _people.map((person) {
+                                final selected = _payerId == person.id;
+                                return ChoiceChip(
+                                  label: Text(person.name),
+                                  selected: selected,
+                                  onSelected: (_) =>
+                                      setState(() => _payerId = person.id),
+                                  selectedColor: const Color(0xFF174843),
+                                  backgroundColor: const Color(0xFF202B40),
+                                  side: BorderSide.none,
+                                  labelStyle: TextStyle(
+                                    color: selected
+                                        ? const Color(0xFF5ADBC1)
+                                        : const Color(0xFFD6DEEF),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(17),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF151F32),
+                          borderRadius: BorderRadius.circular(19),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Expanded(
+                                  child: Text(
+                                    'Who shares the cost?',
+                                    style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                                Text(
+                                  'Split equally',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _selectedParticipantIds.isEmpty
+                                  ? 'Choose group members'
+                                  : '\$${share.toStringAsFixed(2)} per person',
+                              style: const TextStyle(
+                                  color: Color(0xFF9AA8C0), fontSize: 13),
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 7),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF101A2D),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: CheckboxListTile(
+                                value: _selectedParticipantIds.length ==
+                                    _people.length,
+                                onChanged: (checked) {
+                                  setState(() {
+                                    if (checked == true) {
+                                      _selectedParticipantIds
+                                        ..clear()
+                                        ..addAll(_people.map((person) => person.id));
+                                    } else {
+                                      _selectedParticipantIds.clear();
+                                    }
+                                  });
+                                },
+                                title: const Text(
+                                  'Select all',
+                                  style: TextStyle(fontWeight: FontWeight.w700),
+                                ),
+                                subtitle: Text(
+                                  '${_selectedParticipantIds.length} of ${_people.length} members',
+                                  style: const TextStyle(
+                                      color: Color(0xFF9AA8C0), fontSize: 12),
+                                ),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                contentPadding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                activeColor:
+                                    Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            ..._people.map((person) {
+                              final selected = _selectedParticipantIds
+                                  .contains(person.id);
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 7),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF101A2D),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: CheckboxListTile(
+                                  value: selected,
+                                  onChanged: (checked) {
+                                    setState(() {
+                                      if (checked == true) {
+                                        _selectedParticipantIds.add(person.id);
+                                      } else {
+                                        _selectedParticipantIds.remove(person.id);
+                                      }
+                                    });
+                                  },
+                                  title: Text(
+                                    person.name,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  secondary: CircleAvatar(
+                                    radius: 17,
+                                    backgroundColor: const Color(0xFF28344A),
+                                    child: Text(
+                                      person.name.isEmpty
+                                          ? '?'
+                                          : person.name[0].toUpperCase(),
+                                      style: const TextStyle(
+                                        color: Color(0xFFB8C5DB),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  subtitle: selected
+                                      ? Text(
+                                          '\$${share.toStringAsFixed(2)} share',
+                                          style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            fontSize: 12,
+                                          ),
+                                        )
+                                      : null,
+                                  controlAffinity:
+                                      ListTileControlAffinity.leading,
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  activeColor:
+                                      Theme.of(context).colorScheme.primary,
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+      bottomNavigationBar: _people.isEmpty || _loading
+          ? null
+          : SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18, 10, 18, 12),
+                child: FilledButton.icon(
+                  onPressed: _saving ? null : _saveExpense,
+                  icon: _saving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.check_circle_outline_rounded),
+                  label: Text(
+                    _saving
+                        ? 'Saving...'
+                        : 'Save expense  (\$${amount.toStringAsFixed(2)})',
+                  ),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(54),
+                    backgroundColor: const Color(0xFF00A98F),
+                    foregroundColor: const Color(0xFF061921),
+                    textStyle: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            ),
     );
   }
 }
