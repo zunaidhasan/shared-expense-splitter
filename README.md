@@ -124,5 +124,3 @@ This is a small **personal-use MVP**. It intentionally does **not** include:
 This project was created as a freelance deliverable. You are free to use and modify the source code for personal or commercial purposes.
 
 ---
-
-**Built with Flutter** 💙
