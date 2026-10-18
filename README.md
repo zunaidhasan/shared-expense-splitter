@@ -31,6 +31,8 @@ Perfect for personal use — enter expenses, see who paid, and get a clear balan
 
 - **Flutter** + **Dart**
 - **shared_preferences** for local storage
+- **uuid** for unique IDs
+- **intl** for date formatting
 - Material 3 design
 - Android only (as scoped)
 
@@ -51,6 +53,9 @@ Perfect for personal use — enter expenses, see who paid, and get a clear balan
 git clone https://github.com/zunaidhasan/shared-expense-splitter.git
 cd shared-expense-splitter
 
+# If platform folders are missing (android/), generate them:
+flutter create . --platforms=android
+
 # Get dependencies
 flutter pub get
 
@@ -64,7 +69,7 @@ flutter run
 flutter build apk --release
 ```
 
-The APK will be available at:
+The APK will be available at:  
 `build/app/outputs/flutter-apk/app-release.apk`
 
 ---
@@ -73,18 +78,18 @@ The APK will be available at:
 
 ```
 lib/
-├── main.dart                 # App entry point
+├── main.dart                 # App entry point + theme
 ├── models/
 │   ├── person.dart           # Participant model
 │   └── expense.dart          # Expense model
 ├── services/
-│   └── storage_service.dart  # Local persistence
+│   └── storage_service.dart  # Local persistence + balance calculation
 └── screens/
     ├── home_screen.dart      # Bottom navigation host
-    ├── dashboard_screen.dart
-    ├── people_screen.dart
-    ├── add_expense_screen.dart
-    └── history_screen.dart
+    ├── dashboard_screen.dart # Totals + balances
+    ├── people_screen.dart    # Add / remove participants
+    ├── add_expense_screen.dart # Create new expense
+    └── history_screen.dart   # Expense list + delete
 ```
 
 ---
@@ -94,8 +99,8 @@ lib/
 - Each expense is split **equally** among the selected participants.
 - The person who paid is credited the full amount.
 - The balance for each person = (amount they paid) − (their share of all expenses they participated in).
-- Positive balance = others owe them money.
-- Negative balance = they owe money to the group.
+- **Positive balance** = others owe them money.
+- **Negative balance** = they owe money to the group.
 
 ---
 
