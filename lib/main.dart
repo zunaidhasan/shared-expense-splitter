@@ -37,7 +37,7 @@ class SharedExpenseApp extends StatelessWidget {
           elevation: 0,
           scrolledUnderElevation: 0,
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           color: const Color(0xFF162137),
           elevation: 0,
           shape: RoundedRectangleBorder(
